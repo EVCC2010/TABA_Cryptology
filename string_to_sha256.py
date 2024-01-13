@@ -1,33 +1,22 @@
 import hashlib
 
 def string_to_numerical_values(input_string):
-    # Convert each character to its numerical value (A=0, B=1, ..., Z=25)
     numerical_values = [ord(char) - ord('A') for char in input_string.upper()]
     return numerical_values
 
 def convert_to_single_integer(numerical_values, base=26):
-    # Convert a list of numerical values to a single integer
     result = 0
     for value in numerical_values:
         result = result * base + value
     return result
 
 def generate_sha256_hash(plaintext_integer):
-    # Convert the integer to bytes using UTF-8 encoding
     plaintext_bytes = str(plaintext_integer).encode('utf-8')
 
-    # Print the original string
     print("Original Message (String):", plaintext_string)
-
-    # Print the numerical values of each character
     print("Numerical Values of Each Character:", [ord(char) - ord('A') for char in plaintext_string.upper()])
-
-    # Print the single integer value
     print("Single Integer Value:", plaintext_integer)
-
-    # Print the binary representation of the single integer value
-    binary_representation = bin(plaintext_integer)[2:]
-    print("Binary Representation of Single Integer:", binary_representation)
+    print("Binary Representation of Single Integer:", bin(plaintext_integer)[2:])
 
     # Step 1: Padding
     padded_message = pad_message(plaintext_bytes)
@@ -55,12 +44,18 @@ def generate_sha256_hash(plaintext_integer):
     return sha256_hash
 
 def pad_message(message):
-    # Step 1: Padding
     message_length = len(message) * 8  # Length in bits
-    padding_length = (512 - (message_length + 1) % 512) % 512
 
-    padded_message = message + b'\x80' + b'\x00' * (padding_length // 8) + message_length.to_bytes(8, 'big')
-    
+    # Append a single '1' bit
+    padded_message = message + b'\x80'
+
+    # Append '0' bits to reach a multiple of 512 bits less 64 bits
+    padding_length = (448 - (message_length + 1) % 512) % 512
+    padded_message += b'\x00' * (padding_length // 8)
+
+    # Append the original message length as a 64-bit big-endian integer
+    padded_message += message_length.to_bytes(8, 'big')
+
     return padded_message
 
 # Public key and modulus
